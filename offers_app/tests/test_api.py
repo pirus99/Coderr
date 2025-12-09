@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from offers.models import Offer, OfferDetail
+from offers_app.models import Offer, OfferDetail
 
 User = get_user_model()
 
