@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,13 +20,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_4#q0w+b#^fb)+cjq-(7g5#r_8%vv1&z7v%_u3=-1x^35=3-4g'
+# Required: load SECRET_KEY from environment
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    SECRET_KEY = 'django-insecure-_4#q0w+b#^fb)+cjq-(7g5#r_8%vv1&z7v%_u3=-1x^35=3-4g'
+     
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("1", "true", "yes")
+if not DEBUG:
+    DEBUG = True  # For development purposes only
+if DEBUG:
+    print("WARNING: Django is running in DEBUG mode. This is not recommended for production environments.")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if os.environ.get("DJANGO_ALLOWED_HOSTS") else []
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["127.0.0.1"]  # For development purposes only
 
 
 # Application definition
