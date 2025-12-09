@@ -61,6 +61,8 @@ class CustomLoginView(ObtainAuthToken):
                 'email': user.email,
                 'user_id': user.user
             }
+            if not user.is_active:
+                return Response({'error': 'User account is disabled.'}, status=403)
         else:
             data = serializer.errors
             status=400
