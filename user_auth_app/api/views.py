@@ -9,60 +9,55 @@ from user_auth_app.models import UserProfile
 from .serializers import RegistrationSerializer, UserProfileSerializer
 
 class UserProfileListBusiness(generics.ListCreateAPIView):
+    """API endpoint for listing and creating business user profiles."""
     queryset = UserProfile.objects.filter(type='business')
     serializer_class = UserProfileSerializer
 
 class UserProfileListCustomer(generics.ListCreateAPIView):
+    """API endpoint for listing and creating customer user profiles."""
     queryset = UserProfile.objects.filter(type='customer')
     serializer_class = UserProfileSerializer
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    """API endpoint for retrieving, updating, and deleting user profiles."""
     queryset = UserProfile.objects.all()
     permission_classes = [IsAdminOrOwnerOrReadOnly]
     serializer_class = UserProfileSerializer
 
 class RegistrationView(APIView):
+    """API endpoint for user registration."""
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
-        status = 201
-        data = {}
-
+        
         if serializer.is_valid():
             saved_account = serializer.save()
             token, created = Token.objects.get_or_create(user=saved_account)
-            data = {
+            return Response({
                 'token': token.key,
                 'username': saved_account.username,
                 'email': saved_account.email,
                 'user_id': saved_account.user
-            }
-        else:
-            data = serializer.errors
-            status = 400
-
-        return Response(data, status)
+            }, status=201)
+        
+        return Response(serializer.errors, status=400)
     
 class CustomLoginView(ObtainAuthToken):
+    """API endpoint for user login with token generation."""
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        status = 200
-
-        data = {}
+        
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
-            data = {
+            return Response({
                 'token': token.key,
                 'username': user.username,
                 'email': user.email,
                 'user_id': user.user
-            }
-        else:
-            data = serializer.errors
-            status=400
-
-        return Response(data, status)
+            }, status=200)
+        
+        return Response(serializer.errors, status=400)

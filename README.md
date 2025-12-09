@@ -9,6 +9,21 @@ Django backend for Coderr Frontend.
 - Git
 - Windows (commands below use Windows CMD / PowerShell)
 
+## Environment Configuration
+
+For production deployment, create a `.env` file in the project root or set environment variables:
+
+- `DJANGO_SECRET_KEY` - Secret key for Django (generate a new one for production)
+- `DJANGO_DEBUG` - Set to `False` in production (default: `True`)
+- `DJANGO_ALLOWED_HOSTS` - Comma-separated list of allowed hosts (e.g., `yourdomain.com,www.yourdomain.com`)
+
+See `.env.example` for a template.
+
+To generate a new secret key:
+```python
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
+
 ## Quick setup (development)
 
 1. Create and activate virtualenv
@@ -68,8 +83,17 @@ Django backend for Coderr Frontend.
 ## Notes
 
 - REST framework uses TokenAuthentication by default (see core/settings.py).
-- For production set DEBUG=False, configure ALLOWED_HOSTS and a proper SECRET_KEY.
+- Rate limiting is configured (100 requests/hour for anonymous, 1000 requests/hour for authenticated users).
+- For production:
+  - Set `DEBUG=False` via `DJANGO_DEBUG=False` environment variable
+  - Configure `ALLOWED_HOSTS` via `DJANGO_ALLOWED_HOSTS` environment variable
+  - Generate and set a new `SECRET_KEY` via `DJANGO_SECRET_KEY` environment variable
+  - Use a production-ready database (PostgreSQL recommended) instead of SQLite
+  - Configure a web server (nginx/Apache) and WSGI server (Gunicorn/uWSGI)
+  - Set up HTTPS/SSL certificates
 - Collect static files for production:
   ```
   python manage.py collectstatic --noinput
   ```
+- File uploads are limited to 5MB by default
+- Allowed file extensions: jpg, jpeg, png, pdf, doc, docx
