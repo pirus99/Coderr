@@ -18,7 +18,7 @@ def business_user():
         username='business_user',
         email='business@example.com',
         password='testpass123',
-        user_type='business'
+        type='business'
     )
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def customer_user():
         username='customer_user',
         email='customer@example.com',
         password='testpass123',
-        user_type='customer'
+        type='customer'
     )
 
 @pytest.fixture
