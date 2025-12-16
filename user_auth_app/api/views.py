@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from user_auth_app.models import UserProfile
-from .serializers import RegistrationSerializer, UserProfileSerializer
+from .serializers import RegistrationSerializer, UserProfileSerializer, UserCustomerSerializer
 
 class UserProfileListBusiness(generics.ListCreateAPIView):
     queryset = UserProfile.objects.filter(type='business')
@@ -14,7 +14,7 @@ class UserProfileListBusiness(generics.ListCreateAPIView):
 
 class UserProfileListCustomer(generics.ListCreateAPIView):
     queryset = UserProfile.objects.filter(type='customer')
-    serializer_class = UserProfileSerializer
+    serializer_class = UserCustomerSerializer
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()

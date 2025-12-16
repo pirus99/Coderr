@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
+        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -13,6 +13,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             if value is None or (isinstance(value, (list, dict)) and len(value) == 0):
                 data[key] = ''
         return data
+    
+class UserCustomerSerializer(UserProfileSerializer):
+    uploaded_at = serializers.DateTimeField(source='date_joined', read_only=True) 
+    class Meta(UserProfileSerializer.Meta):
+        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'uploaded_at', 'type']
     
 class RegistrationSerializer(serializers.ModelSerializer):
 
