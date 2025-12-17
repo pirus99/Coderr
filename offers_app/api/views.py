@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -6,16 +6,18 @@ from rest_framework import status
 from offers_app.models import Offer, OfferDetails
 from .permissions import IsOwnerOrAdminOrReadOnly, IsBusinessUser
 from .serializers import OfferSerializer, OfferDetailSerializer, OfferCreateSerializer, OfferDetailsSerializer, OfferUpdateSerializer
+from .pagination import OfferPagination
+from .filters import OfferFilter
 
-class OffersView(APIView):
+class OffersView(generics.ListCreateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
     permission_classes = [IsBusinessUser]
-
-    def get(self, request):
-        self.serializer_class = OfferSerializer
-        queryset = Offer.objects.all()
-        offers = queryset
-        serializer = self.serializer_class(offers, many=True, context={'request': request})
-        return Response(serializer.data)
+    pagination_class = OfferPagination
+    filterset_class = OfferFilter
+    search_fields = ['title', 'description']
+    ordering_fields = ['updated_at', 'min_price']
+    ordering = ['updated_at']
     
     def post(self, request):
         self.serializer_class = OfferCreateSerializer
@@ -50,7 +52,7 @@ class OfferDetailView(APIView):
         serializer = self.serializer_class(offer, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=400)
     
     def delete(self, request, pk):

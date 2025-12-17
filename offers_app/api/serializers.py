@@ -65,6 +65,8 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         details_data = validated_data.pop('details', None)
         offer = Offer.objects.create(**validated_data)
 
+        if details_data and len(details_data) != 3:
+            raise serializers.ValidationError({"details": "You must provide 3 OfferDetails."})
         if details_data:
             OfferDetails.objects.bulk_create([
                 OfferDetails(offer=offer, **detail) for detail in details_data
@@ -98,12 +100,18 @@ class OfferUpdateSerializer(OfferSerializer):
                 if detail_offer_type:
                     try:
                         detail_instance = OfferDetails.objects.get(offer=instance, offer_type=detail_offer_type)
-                        detail_instance.title = detail_data.get('title')
-                        detail_instance.revisions = detail_data.get('revisions')
-                        detail_instance.delivery_time_in_days = detail_data.get('delivery_time_in_days')
-                        detail_instance.price = detail_data.get('price')
-                        detail_instance.features = detail_data.get('features')
-                        detail_instance.save()
+                        if detail_instance is not None:
+                            if detail_instance.title is not None:
+                                detail_instance.title = detail_data.get('title')
+                            if detail_instance.revisions is not None:
+                                detail_instance.revisions = detail_data.get('revisions')
+                            if detail_instance.delivery_time_in_days is not None:
+                                detail_instance.delivery_time_in_days = detail_data.get('delivery_time_in_days')
+                            if detail_instance.price is not None:
+                                detail_instance.price = detail_data.get('price')
+                            if detail_instance.features is not None:
+                                detail_instance.features = detail_data.get('features')
+                            detail_instance.save()
                     except OfferDetails.DoesNotExist:
                         raise serializers.ValidationError({"details": "OfferDetail does not exist."})
                 else:
