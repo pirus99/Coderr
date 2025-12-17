@@ -1,12 +1,14 @@
-# tests/test_offers_api.py
+# tests/test_api.py
 import pytest
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from offers_app.models import Offer, OfferDetail
+from offers_app.models import Offer, OfferDetails
 
-User = get_user_model()
+User =  get_user_model()
+
+pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def api_client():
@@ -37,7 +39,7 @@ def offer(business_user):
         title="Test Offer",
         description="Test Description"
     )
-    OfferDetail.objects.create(
+    OfferDetails.objects.create(
         offer=offer,
         title="Basic",
         revisions=2,
@@ -46,7 +48,7 @@ def offer(business_user):
         features=["Feature 1"],
         offer_type="basic"
     )
-    OfferDetail.objects.create(
+    OfferDetails.objects.create(
         offer=offer,
         title="Standard",
         revisions=5,
@@ -55,7 +57,7 @@ def offer(business_user):
         features=["Feature 1", "Feature 2"],
         offer_type="standard"
     )
-    OfferDetail.objects.create(
+    OfferDetails.objects.create(
         offer=offer,
         title="Premium",
         revisions=10,
@@ -73,52 +75,52 @@ def offer_details(offer):
 # GET /api/offers/ Tests
 class TestOffersList:
     def test_list_offers_unauthenticated(self, api_client):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert 'results' in response.data
 
     def test_list_offers_with_creator_filter(self, api_client, business_user, offer):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'creator_id': business_user.id})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 1
-        assert response.data['results'][0]['user'] == business_user.id
+        assert response.data['results'][0]['user_details']['username'] == business_user.username
 
     def test_list_offers_with_min_price_filter(self, api_client, offer):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'min_price': 200})
         assert response.status_code == status.HTTP_200_OK
         assert all(offer['min_price'] >= 200 for offer in response.data['results'])
 
     def test_list_offers_with_max_delivery_time_filter(self, api_client, offer):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'max_delivery_time': 7})
         assert response.status_code == status.HTTP_200_OK
         assert all(offer['min_delivery_time'] <= 7 for offer in response.data['results'])
 
     def test_list_offers_with_ordering(self, api_client, offer):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'ordering': 'min_price'})
         assert response.status_code == status.HTTP_200_OK
         prices = [offer['min_price'] for offer in response.data['results']]
         assert prices == sorted(prices)
 
     def test_list_offers_with_search(self, api_client, offer):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'search': 'Test'})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 1
 
     def test_list_offers_with_pagination(self, api_client, offer):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'page_size': 1})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 1
         assert response.data['count'] == 1
 
     def test_list_offers_invalid_params(self, api_client):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         response = api_client.get(url, {'min_price': 'invalid'})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -126,7 +128,7 @@ class TestOffersList:
 class TestOfferCreate:
     def test_create_offer_authenticated_business(self, api_client, business_user):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         data = {
             "title": "New Offer",
             "description": "New Description",
@@ -160,11 +162,11 @@ class TestOfferCreate:
         response = api_client.post(url, data, format='json')
         assert response.status_code == status.HTTP_201_CREATED
         assert Offer.objects.count() == 1
-        assert OfferDetail.objects.count() == 3
+        assert OfferDetails.objects.count() == 3
 
     def test_create_offer_missing_details(self, api_client, business_user):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         data = {
             "title": "Incomplete Offer",
             "description": "Missing details",
@@ -180,7 +182,7 @@ class TestOfferCreate:
 
     def test_create_offer_not_enough_details(self, api_client, business_user):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         data = {
             "title": "Incomplete Offer",
             "description": "Not enough details",
@@ -199,7 +201,7 @@ class TestOfferCreate:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_offer_unauthenticated(self, api_client):
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         data = {
             "title": "Unauthenticated Offer",
             "description": "Should fail",
@@ -219,7 +221,7 @@ class TestOfferCreate:
 
     def test_create_offer_customer_user(self, api_client, customer_user):
         api_client.force_authenticate(user=customer_user)
-        url = reverse('offer-list')
+        url = reverse('offers-list')
         data = {
             "title": "customer User Offer",
             "description": "Should fail",
@@ -241,19 +243,19 @@ class TestOfferCreate:
 class TestOfferRetrieve:
     def test_retrieve_offer_authenticated(self, api_client, customer_user, offer):
         api_client.force_authenticate(user=customer_user)
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['id'] == offer.id
 
     def test_retrieve_offer_unauthenticated(self, api_client, offer):
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         response = api_client.get(url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_retrieve_nonexistent_offer(self, api_client, customer_user):
         api_client.force_authenticate(user=customer_user)
-        url = reverse('offer-detail', kwargs={'pk': 999})
+        url = reverse('offers-detail', kwargs={'pk': 999})
         response = api_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -261,7 +263,7 @@ class TestOfferRetrieve:
 class TestOfferUpdate:
     def test_update_offer_owner(self, api_client, business_user, offer):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         data = {
             "title": "Updated Title",
             "details": [
@@ -280,27 +282,27 @@ class TestOfferUpdate:
 
     def test_update_offer_non_owner(self, api_client, customer_user, offer):
         api_client.force_authenticate(user=customer_user)
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         data = {"title": "Should Fail"}
         response = api_client.patch(url, data, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_update_offer_unauthenticated(self, api_client, offer):
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         data = {"title": "Should Fail"}
         response = api_client.patch(url, data, format='json')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_update_nonexistent_offer(self, api_client, business_user):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-detail', kwargs={'pk': 999})
+        url = reverse('offers-detail', kwargs={'pk': 999})
         data = {"title": "Should Fail"}
         response = api_client.patch(url, data, format='json')
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_update_offer_invalid_data(self, api_client, business_user, offer):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         data = {"title": ""}  # Empty title should fail
         response = api_client.patch(url, data, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -309,25 +311,25 @@ class TestOfferUpdate:
 class TestOfferDelete:
     def test_delete_offer_owner(self, api_client, business_user, offer):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         response = api_client.delete(url)
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert Offer.objects.count() == 0
 
     def test_delete_offer_non_owner(self, api_client, customer_user, offer):
         api_client.force_authenticate(user=customer_user)
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         response = api_client.delete(url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_delete_offer_unauthenticated(self, api_client, offer):
-        url = reverse('offer-detail', kwargs={'pk': offer.id})
+        url = reverse('offers-detail', kwargs={'pk': offer.id})
         response = api_client.delete(url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_delete_nonexistent_offer(self, api_client, business_user):
         api_client.force_authenticate(user=business_user)
-        url = reverse('offer-detail', kwargs={'pk': 999})
+        url = reverse('offers-detail', kwargs={'pk': 999})
         response = api_client.delete(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
