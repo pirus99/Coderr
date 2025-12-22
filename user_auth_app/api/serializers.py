@@ -3,9 +3,11 @@ from user_auth_app.models import UserProfile
 from django.contrib.auth.models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(source='date_joined', read_only=True)
+
     class Meta:
         model = UserProfile
-        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type']
+        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
