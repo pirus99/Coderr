@@ -1,7 +1,15 @@
-from django.urls import path, include
+"""
+Orders API URL configuration.
+
+This module defines URL patterns for the orders API endpoints,
+mapping URLs to their corresponding view classes.
+"""
+
+from django.urls import include, path
 from rest_framework import routers
+
 from ..models import Order
-from .views import OrdersView, OrderCountView, CompletedOrderCountView
+from .views import CompletedOrderCountView, OrderCountView, OrdersView
 
 urlpatterns = [
     path('orders/', OrdersView.as_view(), name='orders-list'),
