@@ -1,8 +1,22 @@
-from rest_framework import serializers
-from user_auth_app.models import UserProfile
+"""
+User authentication API serializers module.
+
+This module provides serializers for user profile management and authentication.
+It includes serializers for user registration, profile display, and user data conversion.
+"""
+
 from django.contrib.auth.models import User
+from rest_framework import serializers
+
+from user_auth_app.models import UserProfile
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for UserProfile model.
+
+    Provides complete user profile information including personal details,
+    location, contact information, and account metadata.
+    """
     created_at = serializers.DateTimeField(source='date_joined', read_only=True)
 
     class Meta:
@@ -10,7 +24,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
 
     def to_representation(self, instance):
-        """Convert None and empty values to empty strings in the serialized output."""
+        """
+        Convert None and empty values to empty strings in the serialized output.
+
+        Args:
+            instance: UserProfile instance to serialize
+
+        Returns:
+            dict: Serialized user profile data with None values converted to empty strings
+        """
         data = super().to_representation(instance)
         for key, value in list(data.items()):
             if value is None or (isinstance(value, (list, dict)) and len(value) == 0):
@@ -18,11 +40,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return data
     
 class UserCustomerSerializer(UserProfileSerializer):
+    """
+    Serializer for customer user profiles.
+
+    Extends UserProfileSerializer with a custom uploaded_at field
+    and limited fields appropriate for customer profiles.
+    """
     uploaded_at = serializers.DateTimeField(source='date_joined', read_only=True) 
     class Meta(UserProfileSerializer.Meta):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'uploaded_at', 'type']
     
 class RegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+
+    Handles user account creation with password validation,
+    email uniqueness checking, and user type assignment.
+    """
 
     repeated_password = serializers.CharField(write_only=True)
 
@@ -37,6 +71,21 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def save(self):
+        """
+        Create and save a new user account.
+
+        Validates that:
+        - Passwords match
+        - Email is unique
+        - Username is unique
+        - User type is valid ('business' or 'customer')
+
+        Returns:
+            UserProfile: The newly created user profile
+
+        Raises:
+            ValidationError: If any validation fails
+        """
         pw= self.validated_data['password']
         repeated_pw = self.validated_data['repeated_password']
         type = self.validated_data['type']

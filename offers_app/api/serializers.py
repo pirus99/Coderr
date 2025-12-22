@@ -7,7 +7,9 @@ their associated pricing details.
 """
 
 import os
+
 from rest_framework import serializers
+
 from offers_app.models import Offer, OfferDetails
 from user_auth_app.models import UserProfile
 

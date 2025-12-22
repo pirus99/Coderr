@@ -7,6 +7,7 @@ based on various criteria like price, delivery time, and creator.
 
 import django_filters
 from django.db.models import Min
+
 from ..models import Offer
 
 

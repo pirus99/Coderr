@@ -5,16 +5,23 @@ This module provides API views for managing offers and offer details in the appl
 It includes endpoints for listing, creating, updating, and deleting offers and their associated details.
 """
 
-from rest_framework import viewsets, generics
-from rest_framework.views import APIView
+from rest_framework import generics, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.views import APIView
+
 from offers_app.models import Offer, OfferDetails
-from .permissions import IsOwnerOrAdminOrReadOnly, IsBusinessUser
-from .serializers import OfferSerializer, OfferDetailSerializer, OfferCreateSerializer, OfferDetailsSerializer, OfferUpdateSerializer
-from .pagination import OfferPagination
+
 from .filters import OfferFilter
+from .pagination import OfferPagination
+from .permissions import IsBusinessUser, IsOwnerOrAdminOrReadOnly
+from .serializers import (
+    OfferCreateSerializer,
+    OfferDetailSerializer,
+    OfferDetailsSerializer,
+    OfferSerializer,
+    OfferUpdateSerializer,
+)
 
 class OffersView(generics.ListCreateAPIView):
     """

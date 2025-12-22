@@ -1,15 +1,36 @@
+"""
+User authentication API permissions module.
+
+This module provides custom permission classes for controlling access
+to user profile and authentication-related API endpoints.
+"""
+
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS
 
 class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
     """
+    Permission class for user profile access control.
+
+    Access rules:
     - Any authenticated user: read (GET/HEAD/OPTIONS)
     - POST: only staff/superuser
-    - PUT/PATCH (and DELETE): only staff/superuser or object owner
+    - PUT/PATCH/DELETE: only staff/superuser or object owner
     """
 
     def _is_owner(self, owner, user):
-        """Check if the given owner matches the user by comparing instances or PKs."""
+        """
+        Check if the given owner matches the user.
+
+        Compares both instances and primary keys for flexible matching.
+
+        Args:
+            owner: The owner object or ID to check
+            user: The user object to compare against
+
+        Returns:
+            bool: True if owner matches user, False otherwise
+        """
         if owner is None:
             return False
         # direct compare (owner may be a user instance)
@@ -21,6 +42,16 @@ class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
         return owner_pk == user_pk
 
     def has_permission(self, request, view):
+        """
+        Check if the user has general permission to access the view.
+
+        Args:
+            request: The HTTP request object
+            view: The view being accessed
+
+        Returns:
+            bool: True if permission granted, False otherwise
+        """
         user = request.user
         # require authentication for all actions
         if not (user and user.is_authenticated):
@@ -38,6 +69,17 @@ class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        """
+        Check if the user has permission to access a specific object.
+
+        Args:
+            request: The HTTP request object
+            view: The view being accessed
+            obj: The object being accessed
+
+        Returns:
+            bool: True if permission granted, False otherwise
+        """
         user = request.user
         if not (user and user.is_authenticated):
             return False

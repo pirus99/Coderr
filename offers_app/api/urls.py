@@ -5,9 +5,10 @@ This module defines URL patterns for the offers API endpoints,
 mapping URLs to their corresponding view classes and viewsets.
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework import routers
-from .views import OffersView, OfferDetailsView, OfferDetailView
+
+from .views import OfferDetailView, OfferDetailsView, OffersView
 
 router = routers.SimpleRouter()
 router.register(r'offerdetails', OfferDetailsView, basename='offerdetail')
