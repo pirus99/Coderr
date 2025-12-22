@@ -46,6 +46,7 @@ class ReviewsView(APIView):
 class ReviewDetailView(APIView):
 
 	def get_object(self, pk):
+		"""Retrieve a review object by primary key, or return None if not found."""
 		try:
 			return Review.objects.get(pk=pk)
 		except Review.DoesNotExist:
@@ -65,6 +66,7 @@ class ReviewDetailView(APIView):
 		return self._update(request, pk, partial=True)
 
 	def _update(self, request, pk, partial):
+		"""Internal method to handle both PUT and PATCH updates for reviews."""
 		self.permission_classes = [IsOwnerOrAdminOrReadOnly]
 		review = self.get_object(pk)
 		if not review:

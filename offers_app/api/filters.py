@@ -13,10 +13,13 @@ class OfferFilter(django_filters.FilterSet):
         fields = ['user']
 
     def filter_min_price(self, queryset, name, value):
+        """Filter offers by minimum price across their offer details."""
         return queryset.annotate(min_price=Min('details__price')).filter(min_price__gte=value)
 
     def filter_max_delivery_time(self, queryset, name, value):
+        """Filter offers by maximum delivery time in days."""
         return queryset.filter(details__delivery_time_in_days__lte=value).distinct()
 
     def filter_creator_id(self, queryset, name, value):
+        """Filter offers by the creator's user ID."""
         return queryset.filter(user__id=value)

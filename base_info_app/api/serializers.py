@@ -15,16 +15,20 @@ class BaseInfo(serializers.Serializer):
         fields = ['review_count', 'average_rating', 'business_profile_count', 'offer_count']
 
     def get_review_count(self, obj):
+        """Return the total count of all reviews in the system."""
         return Review.objects.all().count()
     
     def get_average_rating(self, obj):
+        """Calculate and return the average rating across all reviews, rounded to 2 decimal places."""
         reviews = Review.objects.all()
         if reviews.exists():
             return round(reviews.aggregate(models.Avg('rating'))['rating__avg'], 2)
         return 0.0
     
     def get_business_profile_count(self, obj):
+        """Return the total count of business type user profiles."""
         return UserProfile.objects.filter(type='business').count()
     
     def get_offer_count(self, obj):
+        """Return the total count of all offer details in the system."""
         return OfferDetails.objects.all().count()

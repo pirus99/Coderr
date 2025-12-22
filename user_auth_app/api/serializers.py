@@ -10,6 +10,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
 
     def to_representation(self, instance):
+        """Convert None and empty values to empty strings in the serialized output."""
         data = super().to_representation(instance)
         for key, value in list(data.items()):
             if value is None or (isinstance(value, (list, dict)) and len(value) == 0):
