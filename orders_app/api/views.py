@@ -24,7 +24,7 @@ class OrdersView(APIView):
             return Response({"error": "offer_detail_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         if offer_details_id not in OfferDetails.objects.values_list('id', flat=True):
             return Response({"error": "Given Offer ID not found."}, status=status.HTTP_404_NOT_FOUND)
-        if request.user.type != 'customer':
+        if request.user.type == 'business':
             return Response({"detail": "Only customers can create orders."}, status=status.HTTP_403_FORBIDDEN)
         serializer = OrderSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
