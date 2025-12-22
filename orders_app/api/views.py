@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from offers_app.models import Offer
+from offers_app.models import Offer, OfferDetails
 from ..models import Order
 from .serializers import OrderSerializer
 from user_auth_app.models import UserProfile
@@ -22,7 +22,7 @@ class OrdersView(APIView):
         offer_details_id = request.data.get('offer_detail_id')
         if offer_details_id is None:
             return Response({"error": "offer_detail_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-        if offer_details_id not in Offer.objects.values_list('id', flat=True):
+        if offer_details_id not in OfferDetails.objects.values_list('id', flat=True):
             return Response({"error": "Given Offer ID not found."}, status=status.HTTP_404_NOT_FOUND)
         if request.user.type != 'customer':
             return Response({"detail": "Only customers can create orders."}, status=status.HTTP_403_FORBIDDEN)
