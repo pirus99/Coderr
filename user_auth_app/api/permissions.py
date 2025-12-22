@@ -9,6 +9,7 @@ class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
     """
 
     def _is_owner(self, owner, user):
+        """Check if the given owner matches the user by comparing instances or PKs."""
         if owner is None:
             return False
         # direct compare (owner may be a user instance)

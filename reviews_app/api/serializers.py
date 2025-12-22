@@ -22,6 +22,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['reviewer']
 
     def validate_rating(self, value):
+        """Validate that the rating is between 1 and 5 inclusive."""
         if value < 1 or value > 5:
             raise serializers.ValidationError('rating must be between 1 and 5')
         return value

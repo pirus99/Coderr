@@ -22,18 +22,21 @@ class OfferSerializer(serializers.ModelSerializer):
     user_details = serializers.SerializerMethodField()
 
     def get_min_price(self, obj):
+        """Return the minimum price among all offer details."""
         details = obj.details.all()
         if details.exists():
             return min(detail.price for detail in details)
         return None
     
     def get_min_delivery_time(self, obj):
+        """Return the minimum delivery time in days among all offer details."""
         details = obj.details.all()
         if details.exists():
             return min(detail.delivery_time_in_days for detail in details)
         return None
     
     def get_user_details(self, obj):
+        """Return a dictionary containing the user's first name, last name, and username."""
         user = UserProfile.objects.filter(id=obj.user.id).first()
         if not user:
             return None
@@ -74,6 +77,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         return offer
 
     def validate_image(self, value):
+        """Validate that the uploaded image has an allowed extension (jpg, jpeg, or png)."""
         if not value:
             return value
         valid_extensions = ['.jpg', '.jpeg', '.png']

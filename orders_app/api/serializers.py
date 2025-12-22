@@ -36,6 +36,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
     
     def validate(self, attrs):
+        """Ensure only 'offer_detail_id' is provided when creating an order via POST."""
         request = self.context['request']
         if request and request.method == 'POST':
             allowed_fields = {'offer_detail_id'}

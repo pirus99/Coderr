@@ -18,6 +18,7 @@ class Offer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def update_image(self):
+        """Generate and set a standardized filename for the offer image."""
         ext = self.image.name.split('.')[-1]
         new_image_name = f"user_{self.user.id}_{self.user.username}_offer_{self.id}.{ext}"
         self.image.name = new_image_name
@@ -47,6 +48,7 @@ class Offer(models.Model):
 
 @receiver(post_delete, sender=Offer)
 def delete_offer_image(sender, instance, **kwargs):
+    """Clean up offer image file from storage after the offer is deleted."""
     if instance.image:
         image_path = instance.image.path
         if os.path.exists(image_path):
