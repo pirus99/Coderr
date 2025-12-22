@@ -60,3 +60,6 @@ class OfferDetails(models.Model):
     price = models.PositiveIntegerField(blank=True, null=True)
     features = models.JSONField(blank=True, null=True, default=list)
     offer_type = models.CharField(max_length=20, choices=[('basic', 'Basic'), ('standard', 'Standard'), ('premium', 'Premium')])
+
+    class Meta:
+        verbose_name = 'Offer Detail'
