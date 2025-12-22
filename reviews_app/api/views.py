@@ -70,7 +70,7 @@ class ReviewsView(APIView):
                 return Response({'detail': 'You have already reviewed this business user'}, status=status.HTTP_403_FORBIDDEN)
         if request.user.type != 'customer':
             return Response({'detail': 'Only customers can create reviews'}, status=status.HTTP_403_FORBIDDEN)
-        if self.request.data.get('business_user') and UserProfile.objects.filter(id=request.data.get('business_user')).exists():
+        if request.data.get('business_user') and UserProfile.objects.filter(id=request.data.get('business_user')).exists():
             business_user = UserProfile.objects.get(id=request.data.get('business_user'))
             if business_user.type != 'business':
                 return Response({'detail': 'You can only review business users'}, status=status.HTTP_400_BAD_REQUEST)
