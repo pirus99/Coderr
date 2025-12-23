@@ -129,21 +129,10 @@ class OrdersView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class OrderCountView(APIView):
-    """
-    API view for retrieving the total count of orders for a business user.
-    """
+    """API view for retrieving the total count of orders for a business user."""
 
     def get(self, request, pk):
-        """
-        Get the total number of orders for a specific business user.
-
-        Args:
-            request: HTTP request
-            pk: Primary key of the business user
-
-        Returns:
-            Response: Order count or error message
-        """
+        """Get the total number of orders for a specific business user."""
         if pk not in UserProfile.objects.values_list('id', flat=True):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_authenticated:
@@ -152,21 +141,10 @@ class OrderCountView(APIView):
         return Response({'error': 'Permission denied, log in to view order count'}, status=status.HTTP_403_FORBIDDEN)
     
 class CompletedOrderCountView(APIView):
-    """
-    API view for retrieving the count of completed orders for a business user.
-    """
+    """API view for retrieving the count of completed orders for a business user."""
 
     def get(self, request, pk):
-        """
-        Get the number of completed orders for a specific business user.
-
-        Args:
-            request: HTTP request
-            pk: Primary key of the business user
-
-        Returns:
-            Response: Completed order count or error message
-        """
+        """Get the number of completed orders for a specific business user."""
         if pk not in UserProfile.objects.values_list('id', flat=True):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_authenticated:

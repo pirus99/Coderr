@@ -1,13 +1,10 @@
 import os
 from django.core.validators import FileExtensionValidator
-from django.core.validators import MinValueValidator
 from django.core.files.storage import default_storage
 from django.db.models.signals import post_delete
 from django.db import models
 from django.dispatch import receiver
 from user_auth_app.models import UserProfile
-
-# Create your models here.
 
 class Offer(models.Model):
     title = models.CharField(max_length=200)

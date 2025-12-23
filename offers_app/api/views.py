@@ -135,10 +135,6 @@ class OfferDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class OfferDetailsView(viewsets.ReadOnlyModelViewSet):
-    """
-    Read-only API viewset for offer details.
-
-    Provides list and retrieve actions for OfferDetails model instances.
-    """
+    """Read-only API viewset for offer details."""
     queryset = OfferDetails.objects.all()
     serializer_class = OfferDetailsSerializer

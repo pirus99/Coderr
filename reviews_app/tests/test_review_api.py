@@ -1,13 +1,8 @@
-from django.test import TestCase
-
-# Create your tests here.
-
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-# Fixtures for authenticated client and user
 @pytest.fixture
 def client():
     return APIClient()

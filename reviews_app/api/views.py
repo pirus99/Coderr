@@ -81,39 +81,17 @@ class ReviewsView(APIView):
 
 
 class ReviewDetailView(APIView):
-    """
-    API view for retrieving, updating, and deleting individual reviews.
-
-    Provides GET, PUT, PATCH, and DELETE methods for managing specific review instances.
-    Only the review owner or admin can update or delete a review.
-    """
+    """API view for retrieving, updating, and deleting individual reviews."""
 
     def get_object(self, pk):
-        """
-        Retrieve a review object by primary key.
-
-        Args:
-            pk: Primary key of the review
-
-        Returns:
-            Review: Review object if found, None otherwise
-        """
+        """Retrieve a review object by primary key."""
         try:
             return Review.objects.get(pk=pk)
         except Review.DoesNotExist:
             return None
 
     def get(self, request, pk):
-        """
-        Retrieve a specific review by ID.
-
-        Args:
-            request: HTTP request
-            pk: Primary key of the review
-
-        Returns:
-            Response: Serialized review object or error message
-        """
+        """Retrieve a specific review by ID."""
         review = self.get_object(pk)
         if not review:
             return Response({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -121,43 +99,15 @@ class ReviewDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
-        """
-        Fully update a review (all fields required).
-
-        Args:
-            request: HTTP request containing updated review data
-            pk: Primary key of the review
-
-        Returns:
-            Response: Updated review object or error message
-        """
+        """Fully update a review (all fields required)."""
         return self._update(request, pk, partial=False)
 
     def patch(self, request, pk):
-        """
-        Partially update a review (only specified fields updated).
-
-        Args:
-            request: HTTP request containing fields to update
-            pk: Primary key of the review
-
-        Returns:
-            Response: Updated review object or error message
-        """
+        """Partially update a review (only specified fields updated)."""
         return self._update(request, pk, partial=True)
 
     def _update(self, request, pk, partial):
-        """
-        Internal method to handle both PUT and PATCH updates for reviews.
-
-        Args:
-            request: HTTP request containing update data
-            pk: Primary key of the review
-            partial: Boolean indicating if update is partial (PATCH) or full (PUT)
-
-        Returns:
-            Response: Updated review object or error message
-        """
+        """Internal method to handle both PUT and PATCH updates for reviews."""
         self.permission_classes = [IsOwnerOrAdminOrReadOnly]
         review = self.get_object(pk)
         if not review:
@@ -172,18 +122,7 @@ class ReviewDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        """
-        Delete a specific review.
-
-        Only the review owner or admin can delete a review.
-
-        Args:
-            request: HTTP request
-            pk: Primary key of the review to delete
-
-        Returns:
-            Response: 204 No Content on success, error message on failure
-        """
+        """Delete a specific review."""
         self.permission_classes = [IsOwnerOrAdminOrReadOnly]
         review = self.get_object(pk)
         if not review:

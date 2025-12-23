@@ -14,11 +14,7 @@ from offers_app.models import Offer, OfferDetails
 from user_auth_app.models import UserProfile
 
 class OfferDetailsHyperlinkedSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Hyperlinked serializer for OfferDetails.
-
-    Provides a URL field for accessing individual offer detail resources.
-    """
+    """Hyperlinked serializer for OfferDetails."""
     url = serializers.HyperlinkedIdentityField(view_name='offerdetail-detail')
 
     class Meta:
@@ -26,69 +22,35 @@ class OfferDetailsHyperlinkedSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url') 
 
 class OfferDetailsSerializer(serializers.ModelSerializer):
-    """
-    Serializer for OfferDetails model.
-
-    Provides full details about offer pricing tiers including
-    title, revisions, delivery time, price, features, and offer type.
-    """
+    """Serializer for OfferDetails model."""
 
     class Meta:
         model = OfferDetails
         fields = ('id','title','revisions','delivery_time_in_days','price','features','offer_type')
 
 class OfferSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Offer model with computed fields.
-
-    Includes hyperlinked offer details, minimum price, minimum delivery time,
-    and user details for the offer creator.
-    """
+    """Serializer for Offer model with computed fields."""
     details = OfferDetailsHyperlinkedSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()
     min_delivery_time = serializers.SerializerMethodField()
     user_details = serializers.SerializerMethodField()
 
     def get_min_price(self, obj):
-        """
-        Return the minimum price among all offer details.
-
-        Args:
-            obj: Offer instance
-
-        Returns:
-            float: Minimum price or None if no details exist
-        """
+        """Return the minimum price among all offer details."""
         details = obj.details.all()
         if details.exists():
             return min(detail.price for detail in details)
         return None
     
     def get_min_delivery_time(self, obj):
-        """
-        Return the minimum delivery time in days among all offer details.
-
-        Args:
-            obj: Offer instance
-
-        Returns:
-            int: Minimum delivery time or None if no details exist
-        """
+        """Return the minimum delivery time in days among all offer details."""
         details = obj.details.all()
         if details.exists():
             return min(detail.delivery_time_in_days for detail in details)
         return None
     
     def get_user_details(self, obj):
-        """
-        Return a dictionary containing the user's first name, last name, and username.
-
-        Args:
-            obj: Offer instance
-
-        Returns:
-            dict: User details or None if user not found
-        """
+        """Return the user's first name, last name, and username."""
         user = UserProfile.objects.filter(id=obj.user.id).first()
         if not user:
             return None
@@ -104,23 +66,14 @@ class OfferSerializer(serializers.ModelSerializer):
                   'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details')
 
 class OfferDetailSerializer(OfferSerializer):
-    """
-    Detailed serializer for Offer model.
-
-    Extends OfferSerializer to include the user ID field.
-    """
+    """Detailed serializer for Offer model including user ID."""
 
     class Meta:
         model = Offer
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time']
 
 class OfferCreateSerializer(serializers.ModelSerializer):
-    """
-    Serializer for creating new Offer instances with details.
-
-    Requires exactly 3 OfferDetails to be provided with the offer.
-    Validates image file extensions.
-    """
+    """Serializer for creating new Offer instances with details."""
     details = OfferDetailsSerializer(many=True)
 
     class Meta:
@@ -128,18 +81,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image', 'description', 'details']
 
     def create(self, validated_data):
-        """
-        Create a new offer with associated details.
-
-        Args:
-            validated_data: Dictionary of validated field values
-
-        Returns:
-            Offer: The newly created offer instance
-
-        Raises:
-            ValidationError: If number of details is not exactly 3
-        """
+        """Create a new offer with associated details."""
         details_data = validated_data.pop('details', None)
         offer = Offer.objects.create(**validated_data)
 
@@ -152,18 +94,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         return offer
 
     def validate_image(self, value):
-        """
-        Validate that the uploaded image has an allowed extension.
-
-        Args:
-            value: The uploaded image file
-
-        Returns:
-            File: The validated image file
-
-        Raises:
-            ValidationError: If file extension is not jpg, jpeg, or png
-        """
+        """Validate that the uploaded image has an allowed extension."""
         if not value:
             return value
         valid_extensions = ['.jpg', '.jpeg', '.png']
@@ -173,28 +104,11 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         return value
     
 class OfferUpdateSerializer(OfferSerializer):
-    """
-    Serializer for updating existing Offer instances.
-
-    Allows updating offer fields and associated details.
-    Details must be identified by their offer_type for updates.
-    """
+    """Serializer for updating existing Offer instances."""
     details = OfferDetailsSerializer(many=True, required=False)
 
     def update(self, instance, validated_data):
-        """
-        Update an existing offer and its details.
-
-        Args:
-            instance: The Offer instance to update
-            validated_data: Dictionary of validated field values
-
-        Returns:
-            Offer: The updated offer instance
-
-        Raises:
-            ValidationError: If offer_type is missing or detail not found
-        """
+        """Update an existing offer and its details."""
         details_data = validated_data.pop('details', None)
         image = validated_data.pop('image', None)
         instance = super().update(instance, validated_data)

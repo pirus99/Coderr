@@ -22,29 +22,17 @@ from .serializers import (
 )
 
 class UserProfileListBusiness(generics.ListCreateAPIView):
-    """
-    API view for listing and creating business user profiles.
-
-    Provides a filtered list of users with type='business'.
-    """
+    """API view for listing and creating business user profiles."""
     queryset = UserProfile.objects.filter(type='business')
     serializer_class = UserProfileSerializer
 
 class UserProfileListCustomer(generics.ListCreateAPIView):
-    """
-    API view for listing and creating customer user profiles.
-
-    Provides a filtered list of users with type='customer'.
-    """
+    """API view for listing and creating customer user profiles."""
     queryset = UserProfile.objects.filter(type='customer')
     serializer_class = UserCustomerSerializer
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API view for retrieving, updating, and deleting user profiles.
-
-    Only the profile owner or admin can update or delete a profile.
-    """
+    """API view for retrieving, updating, and deleting user profiles."""
     queryset = UserProfile.objects.all()
     permission_classes = [IsAdminOrOwnerOrReadOnly]
     serializer_class = UserProfileSerializer
