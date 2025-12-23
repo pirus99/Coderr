@@ -63,18 +63,17 @@ class ReviewsView(APIView):
             Response: Serialized review object on success, errors on failure
         """
         serializer = ReviewCreateSerializer(data=request.data, context={'request': request})
-        if not request.user or not request.user.is_authenticated:
-            return Response({'detail': 'Authentication required to create reviews'}, status=status.HTTP_403_FORBIDDEN)
-        if Review.objects.filter(business_user__id=request.data.get('business_user'), reviewer__id=request.user.id).exists():
-            if Review.objects.get(business_user__id=request.data.get('business_user'), reviewer__id=request.user.id):
-                return Response({'detail': 'You have already reviewed this business user'}, status=status.HTTP_403_FORBIDDEN)
-        if request.user.type != 'customer':
-            return Response({'detail': 'Only customers can create reviews'}, status=status.HTTP_403_FORBIDDEN)
-        if request.data.get('business_user') and UserProfile.objects.filter(id=request.data.get('business_user')).exists():
-            business_user = UserProfile.objects.get(id=request.data.get('business_user'))
-            if business_user.type != 'business':
-                return Response({'detail': 'You can only review business users'}, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
+            if not request.user or not request.user.is_authenticated:
+                return Response({'detail': 'Authentication required to create reviews'}, status=status.HTTP_403_FORBIDDEN)
+            if Review.objects.filter(business_user__id=request.data.get('business_user'), reviewer__id=request.user.id).exists():
+                return Response({'detail': 'You have already reviewed this business user'}, status=status.HTTP_403_FORBIDDEN)
+            if request.user.type != 'customer':
+                return Response({'detail': 'Only customers can create reviews'}, status=status.HTTP_403_FORBIDDEN)
+            if request.data.get('business_user') and UserProfile.objects.filter(id=request.data.get('business_user')).exists():
+                business_user = UserProfile.objects.get(id=request.data.get('business_user'))
+                if business_user.type != 'business':
+                    return Response({'detail': 'You can only review business users'}, status=status.HTTP_400_BAD_REQUEST)
             review = serializer.save()
             return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
