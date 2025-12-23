@@ -11,6 +11,8 @@ Django backend for Coderr Frontend.
 
 ## Quick setup (development)
 
+Start with Cloning the repo, then...
+
 1. Create and activate virtualenv
    - CMD:
      ```
@@ -32,7 +34,7 @@ Django backend for Coderr Frontend.
    pip install django djangorestframework djangorestframework-authtoken pytest pytest-django
    ```
 
-3. Configure environment (optional for one-off run)
+3. Configure optional settings environment
    (you can run the Project without these setting, default values given in settings.py will be used then.)
    ```
    set DJANGO_SETTINGS_MODULE=core.settings
