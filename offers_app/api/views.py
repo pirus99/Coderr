@@ -5,7 +5,7 @@ This module provides API views for managing offers and offer details in the appl
 It includes endpoints for listing, creating, updating, and deleting offers and their associated details.
 """
 
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, filters
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from offers_app.models import Offer, OfferDetails
 
 from .filters import OfferFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import OfferPagination
 from .permissions import IsBusinessUser, IsOwnerOrAdminOrReadOnly
 from .serializers import (
@@ -35,6 +36,7 @@ class OffersView(generics.ListCreateAPIView):
     permission_classes = [IsBusinessUser]
     pagination_class = OfferPagination
     filterset_class = OfferFilter
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description']
     ordering_fields = ['updated_at', 'min_price']
     ordering = ['updated_at']
