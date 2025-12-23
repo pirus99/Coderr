@@ -8,7 +8,7 @@ application, including review metrics, user counts, and offer statistics.
 from django.db import models
 from rest_framework import serializers
 
-from offers_app.models import OfferDetails
+from offers_app.models import Offer
 from reviews_app.models import Review
 from user_auth_app.models import UserProfile
 
@@ -76,4 +76,4 @@ class BaseInfo(serializers.Serializer):
         Returns:
             int: Total number of offer details
         """
-        return OfferDetails.objects.all().count()
+        return Offer.objects.all().count()
