@@ -33,6 +33,7 @@ Django backend for Coderr Frontend.
    ```
 
 3. Configure environment (optional for one-off run)
+   (you can run the Project without these setting, default values given in settings.py will be used then.)
    ```
    set DJANGO_SETTINGS_MODULE=core.settings
    ```
