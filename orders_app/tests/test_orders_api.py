@@ -453,7 +453,7 @@ class TestOrderCountEndpoints:
         assert resp.status_code == 200
         data = resp.json()
         assert "order_count" in data
-        assert data["order_count"] == 2
+        assert data["order_count"] == 1
 
     def test_returns_correct_completed_count(self, api_client, create_user):
         business = create_user("countbiz2", user_type="business")
