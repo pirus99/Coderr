@@ -5,18 +5,12 @@ This module provides serializers for user profile management and authentication.
 It includes serializers for user registration, profile display, and user data conversion.
 """
 
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from user_auth_app.models import UserProfile
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """
-    Serializer for UserProfile model.
-
-    Provides complete user profile information including personal details,
-    location, contact information, and account metadata.
-    """
+    """Serializer for UserProfile model."""
     created_at = serializers.DateTimeField(source='date_joined', read_only=True)
 
     class Meta:
@@ -24,15 +18,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
 
     def to_representation(self, instance):
-        """
-        Convert None and empty values to empty strings in the serialized output.
-
-        Args:
-            instance: UserProfile instance to serialize
-
-        Returns:
-            dict: Serialized user profile data with None values converted to empty strings
-        """
+        """Convert None and empty values to empty strings."""
         data = super().to_representation(instance)
         for key, value in list(data.items()):
             if value is None or (isinstance(value, (list, dict)) and len(value) == 0):
@@ -40,12 +26,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return data
     
 class UserCustomerSerializer(UserProfileSerializer):
-    """
-    Serializer for customer user profiles.
-
-    Extends UserProfileSerializer with a custom uploaded_at field
-    and limited fields appropriate for customer profiles.
-    """
+    """Serializer for customer user profiles."""
     uploaded_at = serializers.DateTimeField(source='date_joined', read_only=True) 
     class Meta(UserProfileSerializer.Meta):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'uploaded_at', 'type']

@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from offers_app.models import Offer, OfferDetails
+from django.db.models import Min
 
 from .filters import OfferFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -31,7 +32,7 @@ class OffersView(generics.ListCreateAPIView):
     Supports filtering, pagination, searching, and ordering of offers.
     Only business users can create offers.
     """
-    queryset = Offer.objects.all()
+    queryset = Offer.objects.all().annotate(min_price=Min('details__price'))
     serializer_class = OfferSerializer
     permission_classes = [IsBusinessUser]
     pagination_class = OfferPagination
@@ -135,10 +136,6 @@ class OfferDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class OfferDetailsView(viewsets.ReadOnlyModelViewSet):
-    """
-    Read-only API viewset for offer details.
-
-    Provides list and retrieve actions for OfferDetails model instances.
-    """
+    """Read-only API viewset for offer details."""
     queryset = OfferDetails.objects.all()
     serializer_class = OfferDetailsSerializer

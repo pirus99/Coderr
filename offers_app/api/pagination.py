@@ -9,17 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 
 
 class OfferPagination(PageNumberPagination):
-    """
-    Custom pagination class for offer list views.
-
-    Configures page size, allows clients to specify custom page size,
-    and sets a maximum page size limit.
-
-    Attributes:
-        page_size (int): Default number of offers per page
-        page_size_query_param (str): Query parameter for custom page size
-        max_page_size (int): Maximum allowed page size
-    """
+    """Custom pagination class for offer list views."""
 
     page_size = 5
     page_size_query_param = 'page_size'

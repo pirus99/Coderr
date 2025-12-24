@@ -60,15 +60,15 @@ class OrdersView(APIView):
             Response: Serialized order object on success, errors on failure
         """
         offer_details_id = request.data.get('offer_detail_id')
+        if offer_details_id is None:
+            return Response({"error": "offer_detail_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         if isinstance(offer_details_id, str):
             try:
                 offer_details_id = int(offer_details_id)
             except ValueError:
                 return Response({"error": "offer_detail_id must be a number."}, status=status.HTTP_400_BAD_REQUEST)
-        if offer_details_id is None:
-            return Response({"error": "offer_detail_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         if offer_details_id not in OfferDetails.objects.values_list('id', flat=True):
-            return Response({"error": "Given Offer Detail ID not found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Given Offer Detail ID not found."}, status=status.HTTP_404_NOT_FOUND)
         if request.user.type == 'business':
             return Response({"detail": "Only customers can create orders."}, status=status.HTTP_403_FORBIDDEN)
         serializer = OrderSerializer(data=request.data, context={'request': request})
@@ -129,44 +129,22 @@ class OrdersView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class OrderCountView(APIView):
-    """
-    API view for retrieving the total count of orders for a business user.
-    """
+    """API view for retrieving the total count of orders for a business user."""
 
     def get(self, request, pk):
-        """
-        Get the total number of orders for a specific business user.
-
-        Args:
-            request: HTTP request
-            pk: Primary key of the business user
-
-        Returns:
-            Response: Order count or error message
-        """
+        """Get the total number of orders for a specific business user."""
         if pk not in UserProfile.objects.values_list('id', flat=True):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_authenticated:
-            order_count = Order.objects.filter(business_user__id=pk).exclude(status='completed').count()
+            order_count = Order.objects.filter(business_user__id=pk).exclude(status='completed').exclude(status='cancelled').count()
             return Response({'order_count': order_count}, status=status.HTTP_200_OK)
         return Response({'error': 'Permission denied, log in to view order count'}, status=status.HTTP_403_FORBIDDEN)
     
 class CompletedOrderCountView(APIView):
-    """
-    API view for retrieving the count of completed orders for a business user.
-    """
+    """API view for retrieving the count of completed orders for a business user."""
 
     def get(self, request, pk):
-        """
-        Get the number of completed orders for a specific business user.
-
-        Args:
-            request: HTTP request
-            pk: Primary key of the business user
-
-        Returns:
-            Response: Completed order count or error message
-        """
+        """Get the number of completed orders for a specific business user."""
         if pk not in UserProfile.objects.values_list('id', flat=True):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_authenticated:
