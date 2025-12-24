@@ -136,7 +136,7 @@ class OrderCountView(APIView):
         if pk not in UserProfile.objects.values_list('id', flat=True):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_authenticated:
-            order_count = Order.objects.filter(business_user__id=pk).exclude(status='completed').count()
+            order_count = Order.objects.filter(business_user__id=pk).exclude(status='completed').exclude(status='cancelled').count()
             return Response({'order_count': order_count}, status=status.HTTP_200_OK)
         return Response({'error': 'Permission denied, log in to view order count'}, status=status.HTTP_403_FORBIDDEN)
     
